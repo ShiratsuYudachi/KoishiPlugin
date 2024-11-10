@@ -1,0 +1,36 @@
+{
+  "name": "koishi-plugin-chatluna-vector-store-management",
+  "description": "vector store management for chatluna",
+  "version": "0.1.0",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "files": [
+    "lib",
+    "dist"
+  ],
+  "keywords": [
+    "chatbot",
+    "koishi",
+    "plugin"
+  ],
+  "devDependencies": {
+    "@koishijs/client": "^5.29.4",
+    "koishi-plugin-chatluna-vector-store-service": "^1.0.0-beta.36"
+  },
+  "peerDependencies": {
+    "@koishijs/plugin-console": "^5.29.4",
+    "koishi": "^4.18.0"
+  },
+  "koishi": {
+    "description": {
+      "zh": "管理 ChatLuna 的向量存储",
+      "en": "Vector store management for ChatLuna"
+    },
+    "service": {
+      "required": [
+        "chatluna",
+        "chatluna-vector-store-service"
+      ]
+    }
+  }
+}
