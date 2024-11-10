@@ -1,12 +1,8 @@
-import { Context, Schema } from 'koishi'
-import { resolve } from 'path'
+import { Context } from 'koishi'
 import {} from '@koishijs/plugin-console'
+import { resolve } from 'path'
 
 export const name = 'chatluna-vector-store-management'
-
-export interface Config {}
-
-export const Config: Schema<Config> = Schema.object({})
 
 export function apply(ctx: Context) {
   ctx.inject(['console'], (ctx) => {

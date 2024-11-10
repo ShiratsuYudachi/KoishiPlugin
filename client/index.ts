@@ -1,12 +1,11 @@
-import { Context } from '@koishijs/client'
-import Page from './page.vue'
-
-import 'virtual:uno.css'
+import { Context } from "@koishijs/client";
+import Page from "./page.vue";
+import "virtual:uno.css";
 
 export default (ctx: Context) => {
   ctx.page({
-    name: '扩展页面',
-    path: '/custom-page',
+    name: "ChatLuna 向量数据库管理",
+    path: "/chatluna-vector-database-management",
     component: Page,
-  })
-}
+  });
+};
