@@ -1,9 +1,12 @@
 <template>
   <k-layout>
     <el-container>
-      <el-header height="48px">
-        <div>当前使用的向量数据库类型</div>
-        <div>数据库地址</div>
+      <el-header>
+        <div>当前使用的向量数据库: {{ configuredVectorStore }} </div>
+        <div>地址: {{ vectorStoreAddress }}</div>
+        <el-button @click="refreshVectorStoreInfo">
+          刷新
+        </el-button>
       </el-header>
       <el-main class="container">
         <el-aside class="sidebar">
@@ -31,6 +34,24 @@
 </template>
 
 <script lang="ts" setup>
+import { send } from '@koishijs/client'
+import { ref } from 'vue'
+
+const configuredVectorStore = ref<string>()
+const vectorStoreAddress = ref<string>()
+
+function refreshVectorStoreInfo() {
+  send('getConfiguredVectorStore').then(data => {
+    configuredVectorStore.value = data
+  })
+  send('getVectorStoreAddress').then(data => {
+    vectorStoreAddress.value = data
+  })
+}
+
+send('getVectorStoreData').then(data => {
+
+})
 const tableData = [
   {
     id: 1,
