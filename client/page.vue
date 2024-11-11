@@ -1,13 +1,6 @@
 <template>
   <k-layout>
-    <el-container>
-      <el-header>
-        <div>当前使用的向量数据库: {{ configuredVectorStore }} </div>
-        <div>地址: {{ vectorStoreAddress }}</div>
-        <el-button @click="refreshVectorStoreInfo">
-          刷新
-        </el-button>
-      </el-header>
+    <el-container style="height: 100%;">
       <el-main class="container">
         <el-aside class="sidebar">
           <el-button>
@@ -20,46 +13,45 @@
             导出选择
           </el-button>
         </el-aside>
-        <el-table class="main" :data="tableData" table-layout="auto">
-          <el-table-column type="selection"></el-table-column>
-          <el-table-column label="Date">
-            <template #default="scope">{{ scope.row.date }}</template>
-          </el-table-column>
-          <el-table-column property="name" label="Name" />
-          <el-table-column property="address" label="Address" />
-        </el-table>
+        <div class="main">
+          <div class="operation-panel">
+            <el-input v-model="filter" placeholder="请输入关键词"></el-input>
+            <el-button @click="getTableData" :disabled="filter.length == 0">查询</el-button>
+            <el-button type="danger">批量删除</el-button>
+          </div>
+          <el-table :data="tableData" height="100%" table-layout="auto">
+            <el-table-column type="selection"></el-table-column>
+            <el-table-column property="pageContent" label="Page Content" />
+            <el-table-column label="操作">
+              <template #default="scope">
+                <el-button @click="deleteDocument(scope.row)" type="danger">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
       </el-main>
     </el-container>
   </k-layout>
 </template>
 
 <script lang="ts" setup>
+import type { Document } from '@langchain/core/documents'
 import { send } from '@koishijs/client'
+
 import { ref } from 'vue'
 
-const configuredVectorStore = ref<string>()
-const vectorStoreAddress = ref<string>()
 
-function refreshVectorStoreInfo() {
-  send('getConfiguredVectorStore').then(data => {
-    configuredVectorStore.value = data
-  })
-  send('getVectorStoreAddress').then(data => {
-    vectorStoreAddress.value = data
-  })
+const tableData = ref<Document[]>([])
+const filter = ref<string>('');
+
+async function getTableData() {
+  tableData.value = await send('vectorstoremanagement/getDocuments', filter.value)
 }
 
-send('getVectorStoreData').then(data => {
+async function deleteDocument(data: Document) {
+  // await send('vectorstoremanagement/deleteSingleDocument', data.id)
+}
 
-})
-const tableData = [
-  {
-    id: 1,
-    date: '2016-05-03',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-]
 </script>
 
 <style lang="css">
@@ -81,6 +73,15 @@ const tableData = [
 
 .main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.operation-panel {
+  display: flex;
+  gap: 4px;
+  flex-wrap: nowrap;
 }
 
 @media (max-width:640px) {

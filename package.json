@@ -13,6 +13,14 @@
     "koishi",
     "plugin"
   ],
+  "dependencies": {
+    "@langchain/community": "^0.3.14",
+    "@langchain/core": "^0.3.18",
+    "@langchain/redis": "^0.1.0",
+    "@zilliz/milvus2-sdk-node": "^2.4.9",
+    "koishi-plugin-chatluna": "^1.0.0-beta.122",
+    "redis": "^4.7.0"
+  },
   "devDependencies": {
     "@koishijs/client": "^5.29.4",
     "koishi-plugin-chatluna-vector-store-service": "^1.0.0-beta.36"
