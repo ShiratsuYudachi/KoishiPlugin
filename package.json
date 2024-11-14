@@ -13,6 +13,9 @@
     "koishi",
     "plugin"
   ],
+  "dependencies": {
+    "redis": "^4.7.0"
+  },
   "devDependencies": {
     "@koishijs/client": "^5.29.4",
     "koishi-plugin-chatluna-vector-store-service": "^1.0.0-beta.36"

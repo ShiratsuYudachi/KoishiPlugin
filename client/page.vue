@@ -1,13 +1,6 @@
 <template>
   <k-layout>
-    <el-container>
-      <el-header>
-        <div>当前使用的向量数据库: {{ configuredVectorStore }} </div>
-        <div>地址: {{ vectorStoreAddress }}</div>
-        <el-button @click="refreshVectorStoreInfo">
-          刷新
-        </el-button>
-      </el-header>
+    <el-container style="height: 100%;">
       <el-main class="container">
         <el-aside class="sidebar">
           <el-button>
@@ -20,16 +13,38 @@
             导出选择
           </el-button>
         </el-aside>
-        <el-table class="main" :data="tableData" table-layout="auto">
-          <el-table-column type="selection"></el-table-column>
-          <el-table-column label="Date">
-            <template #default="scope">{{ scope.row.date }}</template>
-          </el-table-column>
-          <el-table-column property="name" label="Name" />
-          <el-table-column property="address" label="Address" />
-        </el-table>
+        <div class="main">
+          <div class="operation-panel">
+            <el-input v-model="filter" placeholder="请输入关键词"></el-input>
+            <el-button @click="getVectorStoreData">查询</el-button>
+            <el-button type="danger">批量删除</el-button>
+          </div>
+          <el-table :data="vectorStoreData" height="100%" table-layout="auto">
+            <el-table-column type="selection"></el-table-column>
+            <el-table-column property="key" label="Key" />
+            <el-table-column property="content" label="Content" />
+            <el-table-column show-overflow-tooltip property="contentVector" label="Content Vector" />
+            <el-table-column label="操作">
+              <template #default="scope">
+                <el-button @click="handleEdit(scope.row)">编辑</el-button>
+                <el-button @click="handleDelete(scope.row)" type="danger">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
       </el-main>
     </el-container>
+    <el-dialog v-model="onEditing" title="编辑">
+      <div class="main">
+        <el-input v-model="key" disabled />
+        <el-input v-model="content" />
+        <el-input v-model="contentVector" type="textarea" :autosize="{ minRows: 4, maxRows: 8 }" />
+        <div class="operation-panel">
+          <el-button type="primary" @click="handleUpdate">提交</el-button>
+          <el-button type="danger" @click="onEditing = false">取消</el-button>
+        </div>
+      </div>
+    </el-dialog>
   </k-layout>
 </template>
 
@@ -37,29 +52,56 @@
 import { send } from '@koishijs/client'
 import { ref } from 'vue'
 
-const configuredVectorStore = ref<string>()
-const vectorStoreAddress = ref<string>()
-
-function refreshVectorStoreInfo() {
-  send('getConfiguredVectorStore').then(data => {
-    configuredVectorStore.value = data
-  })
-  send('getVectorStoreAddress').then(data => {
-    vectorStoreAddress.value = data
-  })
+interface VectorStoreData {
+  key: string;
+  content: string;
+  contentVector: number[];
 }
 
-send('getVectorStoreData').then(data => {
+const vectorStoreData = ref<VectorStoreData[]>()
+const filter = ref<string>();
 
-})
-const tableData = [
-  {
-    id: 1,
-    date: '2016-05-03',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-]
+const onEditing = ref<boolean>(false);
+
+const originalData = ref<VectorStoreData>();
+const key = ref<string>('');
+const content = ref<string>('');
+const contentVector = ref<string>('');
+
+async function getVectorStoreData() {
+  contentVector.value = await send('vectorstoremanagenent/get-vector-store-data')
+}
+
+function handleEdit(data: VectorStoreData) {
+  onEditing.value = true;
+
+  originalData.value = data
+  key.value = data.key;
+  content.value = data.content;
+  contentVector.value = data.contentVector.toString();
+}
+async function handleUpdate() {
+  await send('vectorstoremanagenent/update-single-entry',
+    originalData.value.key,
+    {
+      key: key.value,
+      content = content.value,
+      contentVector = stringToNumberArray(contentVector.value)
+    },
+  );
+  onEditing.value = false;
+  await getVectorStoreData();
+}
+
+async function handleDelete(data: VectorStoreData) {
+  await send('vectorstoremanagenent/delete-single-entry', data.key);
+  await getVectorStoreData();
+}
+
+function stringToNumberArray(string: string) {
+  return string.split(',').map(numberString => parseFloat(numberString));
+}
+
 </script>
 
 <style lang="css">
@@ -81,6 +123,15 @@ const tableData = [
 
 .main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.operation-panel {
+  display: flex;
+  gap: 4px;
+  flex-wrap: nowrap;
 }
 
 @media (max-width:640px) {
